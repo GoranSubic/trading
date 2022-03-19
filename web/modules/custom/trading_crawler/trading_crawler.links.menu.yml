@@ -4,4 +4,4 @@ trading_crawler.trading:
 #  parent: trading_crawler.route_parent
   route_name: trading_crawler.trading
   weight: 100
-  menu_name: tools
+  menu_name: main
