@@ -1,0 +1,7 @@
+trading_crawler.trading:
+  path: '/trading'
+  defaults:
+    _controller: '\Drupal\trading_crawler\Controller\DefaultController::trading'
+    _title: 'Trading Crawler List'
+  requirements:
+    _permission: 'access content'

@@ -1,0 +1,8 @@
+name: Trading Crawler
+description: Trading Crawler page lists crypto currency info. It lists all the info the currently logged in user has access to.
+type: module
+core_version_requirement: ^9
+package: Trading
+
+dependencies:
+  - drupal:node

@@ -1,0 +1,7 @@
+trading_crawler.trading:
+  title: 'Trading Crawler List'
+  description: 'example of how to make an admin settings page link'
+#  parent: trading_crawler.route_parent
+  route_name: trading_crawler.trading
+  weight: 100
+  menu_name: tools

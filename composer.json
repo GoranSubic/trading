@@ -17,10 +17,11 @@
     "require": {
         "composer/installers": "^1.9",
         "drupal/admin_toolbar": "^3.1",
+        "drupal/console": "~1.0",
         "drupal/core-composer-scaffold": "^9.3",
         "drupal/core-project-message": "^9.3",
         "drupal/core-recommended": "^9.3",
-        "symfony/dom-crawler": "^5.4"
+        "symfony/dom-crawler": "*"
     },
     "conflict": {
         "drupal/drupal": "*"
