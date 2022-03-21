@@ -18,6 +18,8 @@ class DefaultController extends ControllerBase {
    */
   public function trading() {
 
+    \Drupal::logger('default_controller')->notice('In trading execution!!!'); 
+
     $html = file_get_contents("https://www.coingecko.com/");
     $crawler = new Crawler($html);
     $data = $crawler->filter('body table tr td:nth-of-type(3) a:first-of-type');
