@@ -1,0 +1,23 @@
+uuid: 9e2af29d-89a6-4372-b6d7-76ffb161bd98
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_note
+    - node.type.crypto_basic_info
+  module:
+    - text
+id: node.crypto_basic_info.field_note
+field_name: field_note
+entity_type: node
+bundle: crypto_basic_info
+label: Note
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+  required_summary: false
+field_type: text_with_summary

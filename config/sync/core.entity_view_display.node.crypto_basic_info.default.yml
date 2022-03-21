@@ -1,0 +1,81 @@
+uuid: 8528a0d1-a511-4810-950b-162487f31267
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.crypto_basic_info.field_coin_name
+    - field.field.node.crypto_basic_info.field_coin_ticker
+    - field.field.node.crypto_basic_info.field_coin_url
+    - field.field.node.crypto_basic_info.field_date_created
+    - field.field.node.crypto_basic_info.field_date_time_updated
+    - field.field.node.crypto_basic_info.field_note
+    - node.type.crypto_basic_info
+  module:
+    - datetime
+    - link
+    - text
+    - user
+id: node.crypto_basic_info.default
+targetEntityType: node
+bundle: crypto_basic_info
+mode: default
+content:
+  field_coin_name:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_coin_ticker:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 108
+    region: content
+  field_coin_url:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_date_created:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 104
+    region: content
+  field_date_time_updated:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_note:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }

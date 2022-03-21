@@ -1,0 +1,17 @@
+uuid: 861ed7a4-f275-4e92-9386-f17d1461d002
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: 'Coin Github Repository'
+type: coin_github_repository
+description: 'Coin Github Repository - info about repo/subrepo for the coin'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

@@ -1,0 +1,151 @@
+uuid: 0725cda0-6181-4387-bf19-44163575862e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.coin_github_repository.field_closed_issues
+    - field.field.node.coin_github_repository.field_coin_repository_name
+    - field.field.node.coin_github_repository.field_coin_repository_url
+    - field.field.node.coin_github_repository.field_contributors
+    - field.field.node.coin_github_repository.field_crypto
+    - field.field.node.coin_github_repository.field_date_created
+    - field.field.node.coin_github_repository.field_date_time_updated
+    - field.field.node.coin_github_repository.field_forks
+    - field.field.node.coin_github_repository.field_merged_pull_requests
+    - field.field.node.coin_github_repository.field_note
+    - field.field.node.coin_github_repository.field_stars
+    - field.field.node.coin_github_repository.field_total_issues
+    - field.field.node.coin_github_repository.field_watchers
+    - node.type.coin_github_repository
+  module:
+    - datetime
+    - link
+    - text
+    - user
+id: node.coin_github_repository.default
+targetEntityType: node
+bundle: coin_github_repository
+mode: default
+content:
+  field_closed_issues:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_coin_repository_name:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_coin_repository_url:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_contributors:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_crypto:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 115
+    region: content
+  field_date_created:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 111
+    region: content
+  field_date_time_updated:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 114
+    region: content
+  field_forks:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  field_merged_pull_requests:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 108
+    region: content
+  field_note:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 113
+    region: content
+  field_stars:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 104
+    region: content
+  field_total_issues:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 110
+    region: content
+  field_watchers:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }

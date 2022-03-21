@@ -1,0 +1,23 @@
+uuid: c0abf24d-4025-47a2-a46a-3e2e75079265
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_forks
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_forks
+field_name: field_forks
+entity_type: node
+bundle: coin_github_repository
+label: Forks
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

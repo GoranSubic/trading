@@ -1,0 +1,18 @@
+uuid: a12b8eeb-efef-43e4-ba0e-79d9824df980
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.crypto_basic_info
+id: node.crypto_basic_info.title
+field_name: title
+entity_type: node
+bundle: crypto_basic_info
+label: 'Crypto Basic Info'
+description: ''
+required: true
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

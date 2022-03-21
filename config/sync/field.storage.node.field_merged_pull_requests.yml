@@ -1,0 +1,20 @@
+uuid: ec6e66f7-a5ee-464c-ad65-66c409f40448
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_merged_pull_requests
+field_name: field_merged_pull_requests
+entity_type: node
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

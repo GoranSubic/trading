@@ -1,0 +1,19 @@
+uuid: 1f3d1058-ab6f-4c94-93d7-5e7fada969a0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coin_ticker
+    - node.type.crypto_basic_info
+id: node.crypto_basic_info.field_coin_ticker
+field_name: field_coin_ticker
+entity_type: node
+bundle: crypto_basic_info
+label: 'Coin Ticker'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

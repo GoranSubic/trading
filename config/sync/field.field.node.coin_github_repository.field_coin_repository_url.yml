@@ -1,0 +1,23 @@
+uuid: b423673f-d7d2-41aa-8d96-68154432036c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coin_repository_url
+    - node.type.coin_github_repository
+  module:
+    - link
+id: node.coin_github_repository.field_coin_repository_url
+field_name: field_coin_repository_url
+entity_type: node
+bundle: coin_github_repository
+label: 'Coin Repository URL'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 1
+  link_type: 16
+field_type: link

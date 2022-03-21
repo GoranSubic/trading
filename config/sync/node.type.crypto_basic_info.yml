@@ -1,0 +1,17 @@
+uuid: d818d6b6-23a2-4f63-8897-63fa80d4c241
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: 'Crypto Basic Info'
+type: crypto_basic_info
+description: 'Crypto Basic Info - based on table list crawled from https://www.coingecko.com/ page'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

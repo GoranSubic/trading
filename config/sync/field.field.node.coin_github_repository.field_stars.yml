@@ -1,0 +1,23 @@
+uuid: 528d575f-78f3-4a2f-a0bb-4459fbbc729f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_stars
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_stars
+field_name: field_stars
+entity_type: node
+bundle: coin_github_repository
+label: Stars
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

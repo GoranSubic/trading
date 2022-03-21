@@ -1,0 +1,51 @@
+uuid: 28553614-4007-4fb9-8bec-d3928ce7d1b6
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.crypto_basic_info.field_coin_name
+    - field.field.node.crypto_basic_info.field_coin_ticker
+    - field.field.node.crypto_basic_info.field_coin_url
+    - field.field.node.crypto_basic_info.field_date_created
+    - field.field.node.crypto_basic_info.field_date_time_updated
+    - field.field.node.crypto_basic_info.field_note
+    - node.type.crypto_basic_info
+  module:
+    - link
+    - user
+id: node.crypto_basic_info.teaser
+targetEntityType: node
+bundle: crypto_basic_info
+mode: teaser
+content:
+  field_coin_name:
+    type: string
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_coin_url:
+    type: link
+    label: inline
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  field_coin_ticker: true
+  field_date_created: true
+  field_date_time_updated: true
+  field_note: true

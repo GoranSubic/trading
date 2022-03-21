@@ -1,0 +1,22 @@
+uuid: d11eb980-1e9a-4341-8318-21dfb1d78058
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.coin_github_repository
+id: node.coin_github_repository.promote
+field_name: promote
+entity_type: node
+bundle: coin_github_repository
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

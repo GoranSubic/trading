@@ -1,0 +1,19 @@
+uuid: 63400c5e-2cc7-4eae-bc83-53ea3093d0fd
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coin_repository_name
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_coin_repository_name
+field_name: field_coin_repository_name
+entity_type: node
+bundle: coin_github_repository
+label: 'Coin Repository Name'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

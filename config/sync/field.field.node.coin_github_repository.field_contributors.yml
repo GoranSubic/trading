@@ -1,0 +1,23 @@
+uuid: ec4859b0-2fa7-4112-9c91-b541f1f4fed0
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_contributors
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_contributors
+field_name: field_contributors
+entity_type: node
+bundle: coin_github_repository
+label: Contributors
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

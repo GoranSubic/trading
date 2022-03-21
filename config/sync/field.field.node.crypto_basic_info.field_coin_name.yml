@@ -1,0 +1,19 @@
+uuid: 660ca826-11ab-4fb6-b1b5-c7be3c9b2820
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_coin_name
+    - node.type.crypto_basic_info
+id: node.crypto_basic_info.field_coin_name
+field_name: field_coin_name
+entity_type: node
+bundle: crypto_basic_info
+label: 'Coin name'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

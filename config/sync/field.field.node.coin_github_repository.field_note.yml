@@ -1,0 +1,23 @@
+uuid: dfcdaad2-9207-47f2-b3c5-26a67be7cd3a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_note
+    - node.type.coin_github_repository
+  module:
+    - text
+id: node.coin_github_repository.field_note
+field_name: field_note
+entity_type: node
+bundle: coin_github_repository
+label: Note
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+  required_summary: false
+field_type: text_with_summary

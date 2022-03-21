@@ -1,0 +1,23 @@
+uuid: ae88c09d-ba7a-4dda-88f2-b2d9354e7b21
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_total_issues
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_total_issues
+field_name: field_total_issues
+entity_type: node
+bundle: coin_github_repository
+label: 'Total Issues'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

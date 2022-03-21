@@ -1,0 +1,24 @@
+uuid: f855d386-0428-485b-bbec-9d46812b9f5e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_date_created
+    - node.type.coin_github_repository
+  module:
+    - datetime
+id: node.coin_github_repository.field_date_created
+field_name: field_date_created
+entity_type: node
+bundle: coin_github_repository
+label: 'Date created'
+description: ''
+required: true
+translatable: true
+default_value:
+  -
+    default_date_type: now
+    default_date: now
+default_value_callback: ''
+settings: {  }
+field_type: datetime

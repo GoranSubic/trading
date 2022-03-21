@@ -1,0 +1,20 @@
+uuid: 95283a5f-93b7-426d-9026-2c68e41deb56
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.field_stars
+field_name: field_stars
+entity_type: node
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

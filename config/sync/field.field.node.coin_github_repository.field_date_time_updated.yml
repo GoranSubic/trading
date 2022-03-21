@@ -1,0 +1,24 @@
+uuid: 62f617a0-e488-47ce-a8e3-2aa9252e7cfb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_date_time_updated
+    - node.type.coin_github_repository
+  module:
+    - datetime
+id: node.coin_github_repository.field_date_time_updated
+field_name: field_date_time_updated
+entity_type: node
+bundle: coin_github_repository
+label: 'Date time updated'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    default_date_type: now
+    default_date: now
+default_value_callback: ''
+settings: {  }
+field_type: datetime

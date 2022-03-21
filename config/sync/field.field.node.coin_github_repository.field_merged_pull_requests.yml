@@ -1,0 +1,23 @@
+uuid: 22466f66-e665-4f73-908d-ca411df1c857
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_merged_pull_requests
+    - node.type.coin_github_repository
+id: node.coin_github_repository.field_merged_pull_requests
+field_name: field_merged_pull_requests
+entity_type: node
+bundle: coin_github_repository
+label: 'Merged Pull Requests'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: 0
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer
