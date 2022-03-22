@@ -7,6 +7,7 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\node\Entity\Node;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -33,28 +34,24 @@ function trading_crawler_cron() {
     $dataLink = $crawlerSec->filter('a:first-of-type')->extract(['_text', 'href']);
     $dataTicker = $crawlerSec->filter('span')->extract(['_text']);
 
-    $coinName = $dataLink[0][0];
-    $coinUrl = 'https://www.coingecko.com' . $dataLink[0][1];
-    $coinTicker = $dataTicker[0];
+    $coinName = trim($dataLink[0][0]);
+    $coinUrl = 'https://www.coingecko.com' . trim($dataLink[0][1]);
+    $coinTicker = trim($dataTicker[0]);
 
     // Check if already exists in database.
     $query = \Drupal::entityQuery('node')
       ->condition('type', 'crypto_basic_info');
     $query->condition('field_coin_ticker', $coinTicker);
-    // $or = $query->orConditionGroup();
-    // $or->condition('field_coin_url', $coinUrl);
-    // $or->condition('field_coin_name', $coinName);
-    // $query->condition($or);
     $nid = $query->execute();
 
     if (!empty($nid)) continue; // Skip if already in database.
 
     $basicInfo = Node::create([
       'type' => 'crypto_basic_info',
-      'title' => trim($coinName),
-      'field_coin_name' => trim($coinName),
-      'field_coin_url' => trim($coinUrl),
-      'field_coin_ticker' => trim($coinTicker),
+      'title' => $coinName,
+      'field_coin_name' => $coinName,
+      'field_coin_url' => $coinUrl,
+      'field_coin_ticker' => $coinTicker,
       'field_note' => 'Created from cron.',
     ]);
     $basicInfo->save();
@@ -118,10 +115,13 @@ function trading_crawler_cron() {
           $nidRepo = $v;
         }
 
+        $now = DrupalDateTime::createFromTimestamp(time());
+        $now->setTimezone(new \DateTimeZone('CET'));
+
         if (!empty($nidRepo)) {
           $nodeCoinRepo = $node_storage->load($nidRepo);
 
-          // $nodeCoinRepo->set('field_date_time_updated', date("Y-m-d H:i:s", time()));
+          $nodeCoinRepo->set('field_date_time_updated', $now->format('Y-m-d\TH:i:s'));
           $nodeCoinRepo->title = 'Developer ' . trim($coinName) . ' ' . trim($dataCardTitle[0][0]);
           $nodeCoinRepo->field_coin_repository_name = trim($dataCardTitle[0][0]);
           $nodeCoinRepo->field_coin_repository_url = trim($dataCardTitle[0][1]);
@@ -158,3 +158,4 @@ function trading_crawler_cron() {
   }
 
 }
+ 
