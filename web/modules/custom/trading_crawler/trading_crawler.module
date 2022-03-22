@@ -7,8 +7,10 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\node\Entity\Node;
+use Drupal\trading_crawler\BatchCoingGithubManager;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -26,7 +28,7 @@ function _crawl_and_create_crypto_basic_info_nodes(): void {
   $str = '<table><tbody>';
   foreach ($data as $elHtml) {
     $c++;
-    if ($c > 3) break;
+    if ($c > 11) break;
 
 
     $crawlerSec = new Crawler($elHtml);
@@ -59,111 +61,6 @@ function _crawl_and_create_crypto_basic_info_nodes(): void {
 }
 
 /**
- * Create Coin Github Repository node based on existing Crypto Basic Info node
- */
-function _crawl_and_create_coing_github_repository_nodes(): void {
-
-  \Drupal::logger('trading_crawler_cron')->notice('2. In Coin Github Repository crawl!!!'); 
-
-  $today = date("Y-m-d");
-  $nids = \Drupal::entityQuery('node')
-    ->condition('type', 'crypto_basic_info')
-    ->sort('field_date_created', 'ASC')
-    ->execute();
-
-  if (!empty($nids)) {
-    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
-    foreach ($nids as $crypto) {
-      $nodeCoin = $node_storage->load($crypto);
-      $coinName = $nodeCoin->field_coin_name->value;
-      $url = $nodeCoin->field_coin_url->uri;
-
-      $html = file_get_contents($url);
-      $crawler = new Crawler($html);
-      $developer = $crawler->filter('body #developer-tab')->extract(['data-url']);
-
-      $dataDeveloperUrl = 'https://www.coingecko.com' . $developer[0];
-      $html = file_get_contents($dataDeveloperUrl);
-      $crawler = new Crawler($html);
-      $dataDeveloper = $crawler->filter('body div.card-block');
-
-      foreach ($dataDeveloper as $card) {
-        $cardsHtml = $card->ownerDocument->saveHTML($card);
-        $cardCrawler = new Crawler($cardsHtml);
-        $dataCardTitle = $cardCrawler->filter('body div.card-block span:first-of-type a')->extract(['_text', 'href']);
-        $dataCard = $cardCrawler->filter('body div.card-block div.b-b div.row div div:first-of-type')->extract(['_text']);
-       
-        $dataStars = intval($dataCard[0]);
-        $dataWatchers = intval($dataCard[1]);
-        $dataForks = intval($dataCard[2]);
-        $dataContributors = intval($dataCard[3]);
-        $dataMergedPR = intval($dataCard[4]);
-        $dataClosedTotal = $dataCard[5];
-        $dataClosedTotalArr = explode("/", $dataClosedTotal);
-
-
-        
-        // Check if already exists in database.
-        $query = \Drupal::entityQuery('node')
-          ->condition('type', 'coin_github_repository')
-          ->condition('field_date_created', $today);
-        $or = $query->orConditionGroup();
-        $or->condition('field_coin_repository_url', $dataCardTitle[0][1]);
-        $or->condition('field_coin_repository_name', $dataCardTitle[0][0]);
-        $query->condition($or)
-          ->range(0,1);
-        $result = $query->execute();
-
-        $nidRepo = NULL;
-        foreach ($result as $k => $v) {
-          $nidRepo = $v;
-        }
-
-        $now = DrupalDateTime::createFromTimestamp(time());
-        $now->setTimezone(new \DateTimeZone('CET'));
-
-        if (!empty($nidRepo)) {
-          $nodeCoinRepo = $node_storage->load($nidRepo);
-
-          $nodeCoinRepo->set('field_date_time_updated', $now->format('Y-m-d\TH:i:s'));
-          $nodeCoinRepo->title = 'Developer ' . trim($coinName) . ' ' . trim($dataCardTitle[0][0]);
-          $nodeCoinRepo->field_coin_repository_name = trim($dataCardTitle[0][0]);
-          $nodeCoinRepo->field_coin_repository_url = trim($dataCardTitle[0][1]);
-          $nodeCoinRepo->field_stars = $dataStars;
-          $nodeCoinRepo->field_watchers = $dataWatchers;
-          $nodeCoinRepo->field_forks = $dataForks;
-          $nodeCoinRepo->field_contributors = $dataContributors;
-          $nodeCoinRepo->field_merged_pull_requests = $dataMergedPR;
-          $nodeCoinRepo->field_closed_issues = intval($dataClosedTotalArr[0]);
-          $nodeCoinRepo->field_total_issues = intval($dataClosedTotalArr[1]);       
-          $nodeCoinRepo->field_note = 'Created from cron.';
-          $nodeCoinRepo->field_crypto = $crypto;
-        } else {
-          $nodeCoinRepo = Node::create([
-            'type' => 'coin_github_repository',
-            'title' =>  'Developer ' . trim($coinName) . ' ' . trim($dataCardTitle[0][0]),
-            'field_coin_repository_name' => trim($dataCardTitle[0][0]),
-            'field_coin_repository_url' => trim($dataCardTitle[0][1]),
-            'field_stars' => $dataStars,
-            'field_watchers' => $dataWatchers,
-            'field_forks' => $dataForks,
-            'field_contributors' => $dataContributors,
-            'field_merged_pull_requests' => $dataMergedPR,
-            'field_closed_issues' => intval($dataClosedTotalArr[0]),
-            'field_total_issues' => intval($dataClosedTotalArr[1]),          
-            'field_note' => 'Created from cron.',
-            'field_crypto' => $crypto, // Reference to Crypto Basic Info.
-          ]);
-        }
-
-        $nodeCoinRepo->save();
-      }
-    }
-  }
-
-}
-
-/**
  * Implements hook_cron().
  */
 function trading_crawler_cron() {
@@ -178,8 +75,26 @@ function trading_crawler_cron() {
       break;
 
     case ($hour > 1 && $hour < 2):
-      _crawl_and_create_coing_github_repository_nodes();
+      _crawl_with_batch_builder_create_coing_github_repository_nodes();
       break;
   }
+}
+
+/**
+ * Create Coin Github Repository node based on existing Crypto Basic Info node
+ */
+function _crawl_with_batch_builder_create_coing_github_repository_nodes() {
+  $batchBuilder = (new BatchBuilder())
+    ->setTitle(t('Coing_Github_Repository masive create/updates'))
+    ->setFinishCallback([BatchCoingGithubManager::class, 'finishProcess'])
+    ->addOperation([BatchCoingGithubManager::class, 'initOperation'], [
+      ['limit' => 5]
+    ])
+    ->addOperation([BatchCoingGithubManager::class, 'createProcess'], [
+      ['limit' => 5]
+    ])
+    ;
+
+  batch_set($batchBuilder->toArray());
 }
  
