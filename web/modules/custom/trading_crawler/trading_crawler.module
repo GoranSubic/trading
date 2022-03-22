@@ -12,13 +12,12 @@ use Drupal\node\Entity\Node;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
- * Implements hook_cron().
+ * Create Crypto Basic Info - Crypt Name and Crypto URL
  */
-function trading_crawler_cron() {
+function _crawl_and_create_crypto_basic_info_nodes(): void {
 
-  \Drupal::logger('trading_crawler_cron')->notice('In cron execution!!!'); 
+  \Drupal::logger('trading_crawler_cron')->notice('1. In Crypto Basic Info crawl!!!'); 
 
-  // Create Crypto Basic Info - Crypt Name and Crypto URL
   $html = file_get_contents("https://www.coingecko.com/");
   $crawler = new Crawler($html);
   $data = $crawler->filter('body table tr td:nth-of-type(3)');
@@ -57,16 +56,21 @@ function trading_crawler_cron() {
     $basicInfo->save();
   }
 
+}
 
+/**
+ * Create Coin Github Repository node based on existing Crypto Basic Info node
+ */
+function _crawl_and_create_coing_github_repository_nodes(): void {
+
+  \Drupal::logger('trading_crawler_cron')->notice('2. In Coin Github Repository crawl!!!'); 
 
   $today = date("Y-m-d");
-
   $nids = \Drupal::entityQuery('node')
     ->condition('type', 'crypto_basic_info')
     ->sort('field_date_created', 'ASC')
     ->execute();
 
-  // Create Coin Github Repository node based on existing Crypto Basic Info node
   if (!empty($nids)) {
     $node_storage = \Drupal::entityTypeManager()->getStorage('node');
     foreach ($nids as $crypto) {
@@ -157,5 +161,25 @@ function trading_crawler_cron() {
     }
   }
 
+}
+
+/**
+ * Implements hook_cron().
+ */
+function trading_crawler_cron() {
+
+  $hour = date("H");
+
+  \Drupal::logger('trading_crawler_cron')->notice('In cron execution!!! Hour is: ' . $hour); 
+
+  switch ($hour) {
+    case ($hour < 1):
+      _crawl_and_create_crypto_basic_info_nodes();
+      break;
+
+    case ($hour > 1 && $hour < 2):
+      _crawl_and_create_coing_github_repository_nodes();
+      break;
+  }
 }
  
