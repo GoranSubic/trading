@@ -21,6 +21,7 @@
         "drupal/core-composer-scaffold": "^9.3",
         "drupal/core-project-message": "^9.3",
         "drupal/core-recommended": "^9.3",
+        "drupal/views_bulk_operations": "^4.1",
         "symfony/css-selector": "*",
         "symfony/dom-crawler": "*"
     },
