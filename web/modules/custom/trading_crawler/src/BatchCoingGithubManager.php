@@ -62,7 +62,7 @@ class BatchCoingGithubManager {
       $context['finished'] = 1;
     }
 
-    \Drupal::logger('BatchManager')->notice('2.1. Retrived ' . $context['sandbox']['offset'] . ' nodes of ' . $context['sandbox']['total'] . ' from available crypto_basic_info nodes'); 
+    // \Drupal::logger('BatchManager')->notice('2.1. Retrived ' . $context['sandbox']['offset'] . ' nodes of ' . $context['sandbox']['total'] . ' from available crypto_basic_info nodes'); 
 
     // Setup info message to notify about current progress.
     $context['message'] = t(
@@ -105,12 +105,64 @@ class BatchCoingGithubManager {
       $coinName = $nodeCoin->field_coin_name->value;
       $url = $nodeCoin->field_coin_url->uri;
 
-      $html = file_get_contents($url);
+      if (empty($url)) {
+        // Remove current result.
+        unset($context['results'][$key]);
+
+        \Drupal::logger('BatchManager-Error')->notice('URL 1. empty for coin: ' . $coinName); 
+        continue;
+      }
+
+      try {
+        $html = file_get_contents($url);
+      }
+      catch (\InvalidArgumentException $e) {
+        // Remove current result.
+        unset($context['results'][$key]);
+
+        \Drupal::logger('BatchManager-Error')->notice('Throwable error: ' . $e->getMessage()); 
+        continue;
+      }
+
+
+      if (empty($html) && !is_string($html)) {
+        // Remove current result.
+        unset($context['results'][$key]);
+      
+        \Drupal::logger('BatchManager-Error')->notice('Html empty for url: ' . $url); 
+        continue;
+      }
       $crawler = new Crawler($html);
       $developer = $crawler->filter('body #developer-tab')->extract(['data-url']);
 
-      $dataDeveloperUrl = 'https://www.coingecko.com' . $developer[0];
-      $html = file_get_contents($dataDeveloperUrl);
+      if (empty($developer) || empty($developer[0])) {
+        // Remove current result.
+        unset($context['results'][$key]);
+
+        \Drupal::logger('BatchManager-Error')->notice('Developer array is empty for coin: ' . $coinName . ' id: ' . $crypto . ' - ' . $url); 
+        continue;
+      }
+
+      $dataDeveloperUrl = 'https://www.coingecko.com' . trim($developer[0]);
+
+      try {
+        $html = file_get_contents($dataDeveloperUrl);
+      }
+      catch (\InvalidArgumentException $e) {
+        // Remove current result.
+        unset($context['results'][$key]);
+
+        \Drupal::logger('BatchManager-Error')->notice('Throwable error: ' . $e->getMessage());        
+        continue;
+      }
+
+      if (empty($html) || !is_string($html)) {
+        // Remove current result.
+        unset($context['results'][$key]);
+
+        \Drupal::logger('BatchManager-Error')->notice('Html empty for DEVELOPER url: ' . $dataDeveloperUrl); 
+        continue;
+      }
       $crawler = new Crawler($html);
       $dataDeveloper = $crawler->filter('body div.card-block');
 
@@ -128,8 +180,6 @@ class BatchCoingGithubManager {
         $dataClosedTotal = $dataCard[5];
         $dataClosedTotalArr = explode("/", $dataClosedTotal);
 
-
-        
         // Check if already exists in database.
         $query = \Drupal::entityQuery('node')
           ->condition('type', 'coin_github_repository')
@@ -196,7 +246,9 @@ class BatchCoingGithubManager {
       }
     }
 
-    \Drupal::logger('BatchManager')->notice('2.2. Updating articles... ' . count($context['results']) . ' pending...'); 
+
+    \Drupal::logger('BatchManager')->notice('2.2. Updating articles... ' . count($context['results']) . ' pending.... <pre>' . print_r($context['results'], 1) . '</pre>'); 
+
 
     // Setup message to notify how many remaining articles.
     $context['message'] = t(

@@ -16,46 +16,55 @@ use Symfony\Component\DomCrawler\Crawler;
 /**
  * Create Crypto Basic Info - Crypt Name and Crypto URL
  */
-function _crawl_and_create_crypto_basic_info_nodes(): void {
+function _crawl_and_create_crypto_basic_info_nodes($page = 1): void {
 
-  \Drupal::logger('trading_crawler_cron')->notice('1. In Crypto Basic Info crawl!!!'); 
+  \Drupal::logger('trading_crawler_cron')->notice('1. In Crypto Basic Info crawl - page ' . $page);
 
-  $html = file_get_contents("https://www.coingecko.com/");
+  $urlToCheck = "https://www.coingecko.com/?page=" . $page;
+  $html = file_get_contents($urlToCheck);
   $crawler = new Crawler($html);
   $data = $crawler->filter('body table tr td:nth-of-type(3)');
 
-  $c = 0;
-  $str = '<table><tbody>';
-  foreach ($data as $elHtml) {
-    $c++;
-    if ($c > 11) break;
+  if (count($data)) {
+    $c = 0;
+    $str = '<table><tbody>';
+    foreach ($data as $elHtml) {
+      // $c++;
+      // if ($c > 3) break;
 
+      $crawlerSec = new Crawler($elHtml);
+      $dataLink = $crawlerSec->filter('a:first-of-type')->extract(['_text', 'href']);
+      $dataTicker = $crawlerSec->filter('span')->extract(['_text']);
 
-    $crawlerSec = new Crawler($elHtml);
-    $dataLink = $crawlerSec->filter('a:first-of-type')->extract(['_text', 'href']);
-    $dataTicker = $crawlerSec->filter('span')->extract(['_text']);
+      $coinName = trim($dataLink[0][0]);
+      $coinUrl = 'https://www.coingecko.com' . trim($dataLink[0][1]);
+      $coinTicker = trim($dataTicker[0]);
 
-    $coinName = trim($dataLink[0][0]);
-    $coinUrl = 'https://www.coingecko.com' . trim($dataLink[0][1]);
-    $coinTicker = trim($dataTicker[0]);
+      if (strlen($coinTicker) > 124) continue;
 
-    // Check if already exists in database.
-    $query = \Drupal::entityQuery('node')
-      ->condition('type', 'crypto_basic_info');
-    $query->condition('field_coin_ticker', $coinTicker);
-    $nid = $query->execute();
+      // Check if already exists in database.
+      $query = \Drupal::entityQuery('node')
+        ->condition('type', 'crypto_basic_info');
+      $query->condition('field_coin_ticker', $coinTicker);
+      $nid = $query->execute();
 
-    if (!empty($nid)) continue; // Skip if already in database.
+      if (!empty($nid)) continue; // Skip if already in database.
 
-    $basicInfo = Node::create([
-      'type' => 'crypto_basic_info',
-      'title' => $coinName,
-      'field_coin_name' => $coinName,
-      'field_coin_url' => $coinUrl,
-      'field_coin_ticker' => $coinTicker,
-      'field_note' => 'Created from cron.',
-    ]);
-    $basicInfo->save();
+      $basicInfo = Node::create([
+        'type' => 'crypto_basic_info',
+        'title' => $coinName,
+        'field_coin_name' => $coinName,
+        'field_coin_url' => $coinUrl,
+        'field_coin_ticker' => $coinTicker,
+        'field_note' => 'Created from cron.',
+      ]);
+      $basicInfo->save();
+    }
+
+    \Drupal::logger('trading_crawler_cron')->notice('1.1. In Crypto Basic Info crawl - finished page ' . $page);
+
+    _crawl_and_create_crypto_basic_info_nodes($page + 1);
+
   }
 
 }
@@ -74,7 +83,7 @@ function trading_crawler_cron() {
       _crawl_and_create_crypto_basic_info_nodes();
       break;
 
-    case ($hour > 1 && $hour < 2):
+    case ($hour > 1 && $hour < 23):
       _crawl_with_batch_builder_create_coing_github_repository_nodes();
       break;
   }
@@ -88,10 +97,10 @@ function _crawl_with_batch_builder_create_coing_github_repository_nodes() {
     ->setTitle(t('Coing_Github_Repository masive create/updates'))
     ->setFinishCallback([BatchCoingGithubManager::class, 'finishProcess'])
     ->addOperation([BatchCoingGithubManager::class, 'initOperation'], [
-      ['limit' => 5]
+      ['limit' => 10]
     ])
     ->addOperation([BatchCoingGithubManager::class, 'createProcess'], [
-      ['limit' => 5]
+      ['limit' => 10]
     ])
     ;
 
