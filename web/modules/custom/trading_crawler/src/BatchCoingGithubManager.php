@@ -278,8 +278,7 @@ class BatchCoingGithubManager {
 
     // Setup final message after process is done.
     $message = ($success) ?
-      t('Update process of @count articles was completed.',
-        ['@count' => $results]) :
+      t('Update process of @count articles was completed.', ['@count' => $results]) :
       t('Finished with an error.');
     \Drupal::messenger()->addMessage($message);
   }

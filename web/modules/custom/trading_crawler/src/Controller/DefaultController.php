@@ -2,8 +2,12 @@
 
 namespace Drupal\trading_crawler\Controller;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\node\Entity\Node;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class DefaultController.
@@ -11,12 +15,40 @@ use Symfony\Component\DomCrawler\Crawler;
 class DefaultController extends ControllerBase {
 
   /**
+   * Ajax method to set priority one crypto
+   * 
+   * @param Node $cryptoid
+   * @return AjaxResponse
+   */
+  public function changePriorityOne(Node $cryptoid, Request $request): AjaxResponse
+  {  
+    $response = new AjaxResponse();
+
+    $changed = '';
+    if ($cryptoid->hasField('field_priority_1') && !empty($cryptoid->get('field_priority_1')->value)) {
+      $cryptoid->set('field_priority_1', FALSE);
+      $changed = 'No';
+    } else {
+      $cryptoid->set('field_priority_1', TRUE);
+      $changed = 'Yes';
+    }
+    $cryptoid->save();
+
+    $selector = '#crypto-' . $cryptoid->id();
+    $response->addCommand(new InvokeCommand($selector, 'text', [$changed]));
+
+    return $response;
+
+  }
+
+  /**
    * Trading crawler.
    *
    * @return array
    *   Return tradingCrawler info.
    */
-  public function trading() {
+  public function trading() 
+  {
 
     \Drupal::logger('default_controller')->notice('In trading execution!!!'); 
 

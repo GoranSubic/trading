@@ -5,3 +5,22 @@ trading_crawler.trading:
     _title: 'Trading Crawler List'
   requirements:
     _permission: 'access content'
+
+trading_crawler.important_coins.form:
+  path: '/important-coins'
+  defaults:
+    _title: 'Important Coins'
+    _form: '\Drupal\trading_crawler\Form\ImportantCoinsForm'
+  requirements:
+    _permission: 'access content'
+
+trading_crawler.change_priority_one:
+  path: '/ajax-call/change-priority-one/{cryptoid}'
+  defaults: 
+    _controller: '\Drupal\trading_crawler\Controller\DefaultController::changePriorityOne' 
+  requirements: 
+    _permission: 'access content' 
+  options:
+    parameters:
+      cryptoid:
+        type: entity:node
