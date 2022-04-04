@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.crypto_basic_info.field_date_created
     - field.field.node.crypto_basic_info.field_date_time_updated
     - field.field.node.crypto_basic_info.field_note
+    - field.field.node.crypto_basic_info.field_priority_1
     - node.type.crypto_basic_info
   module:
     - datetime
@@ -26,7 +27,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 102
+    weight: 2
     region: content
   field_coin_ticker:
     type: string
@@ -34,7 +35,7 @@ content:
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    weight: 108
+    weight: 7
     region: content
   field_coin_url:
     type: link
@@ -46,7 +47,7 @@ content:
       rel: ''
       target: ''
     third_party_settings: {  }
-    weight: 103
+    weight: 3
     region: content
   field_date_created:
     type: datetime_default
@@ -55,7 +56,7 @@ content:
       timezone_override: ''
       format_type: medium
     third_party_settings: {  }
-    weight: 104
+    weight: 4
     region: content
   field_date_time_updated:
     type: datetime_default
@@ -64,18 +65,28 @@ content:
       timezone_override: ''
       format_type: medium
     third_party_settings: {  }
-    weight: 107
+    weight: 6
     region: content
   field_note:
     type: text_default
     label: above
     settings: {  }
     third_party_settings: {  }
-    weight: 106
+    weight: 5
+    region: content
+  field_priority_1:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 1
     region: content
   links:
     settings: {  }
     third_party_settings: {  }
-    weight: 100
+    weight: 0
     region: content
 hidden: {  }

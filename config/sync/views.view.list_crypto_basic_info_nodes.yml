@@ -4,6 +4,7 @@ status: true
 dependencies:
   config:
     - field.storage.node.field_coin_ticker
+    - field.storage.node.field_priority_1
     - node.type.crypto_basic_info
     - system.menu.main
   module:
@@ -195,6 +196,71 @@ display:
           multi_type: separator
           separator: ', '
           field_api_classes: false
+        field_priority_1:
+          id: field_priority_1
+          table: node__field_priority_1
+          field: field_priority_1
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: field
+          label: 'Priority 1'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: boolean
+          settings:
+            format: yes-no
+            format_custom_false: ''
+            format_custom_true: ''
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
       pager:
         type: full
         options:
@@ -220,10 +286,10 @@ display:
         type: basic
         options:
           submit_button: Apply
-          reset_button: false
+          reset_button: true
           reset_button_label: Reset
           exposed_sorts_label: 'Sort by'
-          expose_sort_order: true
+          expose_sort_order: false
           sort_asc_label: Asc
           sort_desc_label: Desc
       access:
@@ -251,6 +317,19 @@ display:
             field_identifier: ''
           exposed: false
           granularity: second
+        field_priority_1_value:
+          id: field_priority_1_value
+          table: node__field_priority_1
+          field: field_priority_1_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: standard
+          order: DESC
+          expose:
+            label: ''
+            field_identifier: ''
+          exposed: false
       arguments: {  }
       filters:
         status:
@@ -291,6 +370,7 @@ display:
           replica: false
           query_tags: {  }
       relationships: {  }
+      use_ajax: true
       header: {  }
       footer: {  }
       display_extenders: {  }
@@ -304,12 +384,14 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.field_coin_ticker'
+        - 'config:field.storage.node.field_priority_1'
   page_1:
     id: page_1
     display_title: Page
     display_plugin: page
     position: 1
     display_options:
+      exposed_block: true
       display_extenders: {  }
       path: list-crypto-basic-info-nodes
       menu:
@@ -331,3 +413,4 @@ display:
         - user.permissions
       tags:
         - 'config:field.storage.node.field_coin_ticker'
+        - 'config:field.storage.node.field_priority_1'

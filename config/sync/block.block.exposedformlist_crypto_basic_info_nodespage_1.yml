@@ -1,0 +1,28 @@
+uuid: 6ab44a60-f44a-4a89-ad71-7762f594221f
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.list_crypto_basic_info_nodes
+  module:
+    - system
+    - views
+  theme:
+    - bartik
+id: exposedformlist_crypto_basic_info_nodespage_1
+theme: bartik
+region: content
+weight: -6
+provider: null
+plugin: 'views_exposed_filter_block:list_crypto_basic_info_nodes-page_1'
+settings:
+  id: 'views_exposed_filter_block:list_crypto_basic_info_nodes-page_1'
+  label: ''
+  label_display: visible
+  provider: views
+  views_label: ''
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /list-crypto-basic-info-nodes

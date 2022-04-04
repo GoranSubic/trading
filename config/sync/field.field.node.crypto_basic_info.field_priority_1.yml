@@ -1,0 +1,23 @@
+uuid: bea3fe86-0ca8-4c7b-935a-17084aa0eb0d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_priority_1
+    - node.type.crypto_basic_info
+id: node.crypto_basic_info.field_priority_1
+field_name: field_priority_1
+entity_type: node
+bundle: crypto_basic_info
+label: 'Priority 1'
+description: 'This Crypto is important to track!'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Important
+  off_label: 'Not important'
+field_type: boolean

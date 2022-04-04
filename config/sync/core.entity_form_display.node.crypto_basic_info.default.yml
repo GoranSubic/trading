@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.crypto_basic_info.field_date_created
     - field.field.node.crypto_basic_info.field_date_time_updated
     - field.field.node.crypto_basic_info.field_note
+    - field.field.node.crypto_basic_info.field_priority_1
     - node.type.crypto_basic_info
   module:
     - datetime
@@ -22,19 +23,11 @@ mode: default
 content:
   created:
     type: datetime_timestamp
-    weight: 2
+    weight: 3
     region: content
     settings: {  }
     third_party_settings: {  }
   field_coin_name:
-    type: string_textfield
-    weight: 7
-    region: content
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-  field_coin_ticker:
     type: string_textfield
     weight: 8
     region: content
@@ -42,9 +35,17 @@ content:
       size: 60
       placeholder: ''
     third_party_settings: {  }
+  field_coin_ticker:
+    type: string_textfield
+    weight: 9
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
   field_coin_url:
     type: link_default
-    weight: 9
+    weight: 10
     region: content
     settings:
       placeholder_url: ''
@@ -52,19 +53,19 @@ content:
     third_party_settings: {  }
   field_date_created:
     type: datetime_default
-    weight: 10
+    weight: 11
     region: content
     settings: {  }
     third_party_settings: {  }
   field_date_time_updated:
     type: datetime_default
-    weight: 11
+    weight: 12
     region: content
     settings: {  }
     third_party_settings: {  }
   field_note:
     type: text_textarea_with_summary
-    weight: 12
+    weight: 13
     region: content
     settings:
       rows: 9
@@ -72,36 +73,43 @@ content:
       placeholder: ''
       show_summary: false
     third_party_settings: {  }
+  field_priority_1:
+    type: boolean_checkbox
+    weight: 0
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
   path:
     type: path
-    weight: 5
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   promote:
-    type: boolean_checkbox
-    weight: 3
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
-  status:
-    type: boolean_checkbox
-    weight: 6
-    region: content
-    settings:
-      display_label: true
-    third_party_settings: {  }
-  sticky:
     type: boolean_checkbox
     weight: 4
     region: content
     settings:
       display_label: true
     third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 7
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 5
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
   title:
     type: string_textfield
-    weight: 0
+    weight: 1
     region: content
     settings:
       size: 60
@@ -109,7 +117,7 @@ content:
     third_party_settings: {  }
   uid:
     type: entity_reference_autocomplete
-    weight: 1
+    weight: 2
     region: content
     settings:
       match_operator: CONTAINS

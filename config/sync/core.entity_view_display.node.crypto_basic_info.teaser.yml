@@ -10,6 +10,7 @@ dependencies:
     - field.field.node.crypto_basic_info.field_date_created
     - field.field.node.crypto_basic_info.field_date_time_updated
     - field.field.node.crypto_basic_info.field_note
+    - field.field.node.crypto_basic_info.field_priority_1
     - node.type.crypto_basic_info
   module:
     - link
@@ -49,3 +50,4 @@ hidden:
   field_date_created: true
   field_date_time_updated: true
   field_note: true
+  field_priority_1: true
