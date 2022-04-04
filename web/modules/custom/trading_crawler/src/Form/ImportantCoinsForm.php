@@ -3,14 +3,10 @@
 namespace Drupal\trading_crawler\Form;
 
 use Drupal;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AppendCommand;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Pager\PagerManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ImportantCoinsForm extends FormBase
@@ -24,21 +20,33 @@ class ImportantCoinsForm extends FormBase
   protected $nodeStorage;
 
   /**
-   * Constructs a new BookAdminEditForm.
+   * The pager manager.
+   *
+   * @var \Drupal\Core\Pager\PagerManagerInterface
+   */
+  protected $pagerManager;
+
+  /**
+   * Constructs a new ImportantCoinsForm.
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $node_storage
    *   The custom block storage.
+   * @param \Drupal\Core\Pager\PagerManagerInterface $pagerManager
+   *   The pager manager service.
+   *
    */
-  public function __construct(EntityStorageInterface $node_storage) {
+  public function __construct(EntityStorageInterface $node_storage, PagerManagerInterface $pagerManager) {
     $this->nodeStorage = $node_storage;
+    $this->pagerManager = $pagerManager;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    $entity_type_manager = $container->get('entity_type.manager');
-    return new static($entity_type_manager->getStorage('node'));
+    $entityTypeManager = $container->get('entity_type.manager');
+    $pagerManager = $container->get('pager.manager');
+    return new static($entityTypeManager->getStorage('node'), $pagerManager);
   }
 
   /**
@@ -54,6 +62,17 @@ class ImportantCoinsForm extends FormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state): array
   {
+    $session = $this->getRequest()->getSession();
+
+    $pagerValue = (int)($this->getRequest()->get('page'));
+    $allNids = $session->get('all_nids');
+
+    $checkByField = $session->get('check_by');
+    $fromValue = $session->get('from_value');
+    $toValue = $session->get('to_value');
+    
+    $form['#attached']['library'][] = 'trading_crawler/important-coins-form-js';
+
     $definitions = Drupal::service('entity_field.manager')
       ->getFieldDefinitions('node', 'coin_github_repository');
 
@@ -67,46 +86,34 @@ class ImportantCoinsForm extends FormBase
       '#type' => 'select',
       '#title' => $this->t('Find by field'),
       '#options' => $values,
+      '#default_value' => $checkByField ? $checkByField : '',
       '#empty_option' => $this->t('- Select field -'),
     ];
 
     $form['from_value'] = [
       '#type' => 'number',
       '#title' => $this->t('From'),
-      '#default_value' => 0,
+      '#default_value' => $fromValue ? $fromValue : 0,
       '#min' => 0,
     ];
 
     $form['to_value'] = [
       '#type' => 'number',
       '#title' => $this->t('To'),
-      '#default_value' => 1,
+      '#default_value' => $toValue ? $toValue : 0,
       '#min' => 0,
     ];
 
-    // $form['actions']['#type'] = 'actions';
+    $form['actions']['#type'] = 'actions';
     
-    $form['findCrypto'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Find'),
-      '#attributes' => [
-        'class' => [
-          'use-ajax',
-        ],
-      ],
-      '#ajax' => [
-        'callback' => '::findSubmitFunction',
-        'wrapper' => 'replace-form-data',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ],
-      'progress' => [
-        'type' => 'throbber',
-        'message' => $this->t('Verifying entry...'),
-      ],
-      '#button_type' => 'primary',
+    $form['actions']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Show results'),
+        '#button_type' => 'primary',
+        '#attributes' => [
+          'class' => ['check-important-coins',],
+        ]
     ];
-    
 
     $header = [
       'coin_name' => $this->t('Coin Name'),
@@ -122,7 +129,25 @@ class ImportantCoinsForm extends FormBase
       '#prefix' => '<div id="replace-form-data">',
       '#suffix' => '</div>',
     ];
+  
+    if (!empty($form_state->getValue('results_table'))) {
+      $form['results_table'] = $form_state->getValue('results_table');
+    }
 
+    if (!empty($form_state->getValue('pager'))) {
+      $form['pager'] = $form_state->getValue('pager');
+    } else if (empty($form_state->getValue('results_table')) && $pagerValue !== NULL && !empty($allNids)) {
+      // Build pager after choosing pager link
+      $perPage = 10;
+      $rows = [];
+      $pagerNids = $this->pagerArray($allNids, $perPage, $pagerValue);
+      $this->createRows($pagerNids, $rows);
+      $form['results_table']['#rows'] = $rows;
+
+      $form['pager'] = [
+        '#type' => 'pager',
+      ];
+    }
 
     return $form;
   }
@@ -140,10 +165,6 @@ class ImportantCoinsForm extends FormBase
       $form_state->setErrorByName('to_value', $this->t('Search could not be lower than 0!'));
     }
 
-    if ($form_state->getValue('to_value') < 1) {
-      $form_state->setErrorByName('to_value', $this->t('Search should have some range!'));
-    }
-
     if ($form_state->getValue('to_value') < $form_state->getValue('from_value')) {
       $form_state->setErrorByName('to_value', $this->t('Search should be with sense!'));
     }
@@ -154,33 +175,56 @@ class ImportantCoinsForm extends FormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-  }
-
-  /**
-   * Populate table with results.
-   * 
-   * @param array $form — An associative array containing the structure of the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   * The current state of the form.
-   * 
-   */
-  public function findSubmitFunction(array $form, FormStateInterface $form_state)
-  {
-    $response = new AjaxResponse();
+    $session = $this->getRequest()->getSession();
 
     $checkByField = $form_state->getValue('check_by');
     $fromValue = $form_state->getValue('from_value');
     $toValue = $form_state->getValue('to_value');
+
+    $session->set('check_by', $checkByField);
+    $session->set('from_value', $fromValue);
+    $session->set('to_value', $toValue);
     
     $query = $this->nodeStorage->getAggregateQuery();
-    $query->condition('type', 'coin_github_repository');
-    $query->condition($checkByField, $fromValue, '>=');
-    $query->condition($checkByField, $toValue, '<=');
-    $query->sort('field_crypto', 'DESC');
-    $query->groupBy('field_crypto');
-    $nIds = $query->execute();
+    $query->condition('type', 'coin_github_repository')
+      ->condition($checkByField, $fromValue, '>=')
+      ->condition($checkByField, $toValue, '<=')
+      ->sort('field_coin_repository_name', 'ASC')
+      ->groupBy('field_crypto');
     
+    $allNids = $query->execute();
+    $session->set('all_nids', $allNids);
+
+    $query->pager();
+    $nIds = $query->execute();
+
     $rows = [];
+    $this->createRows($nIds, $rows);
+
+    $form['results_table']['#rows'] = $rows;
+    $form_state->setValue('results_table', $form['results_table']);
+    
+    $form['pager'] = [
+      '#type' => 'pager',
+    ];
+    $form_state->setValue('pager', $form['pager']);
+
+    $form_state->setRebuild(TRUE);
+  }
+
+  /**
+   * Build rows for table
+   * 
+   * @param array $items
+   *   Array of node id - from pager.
+   * @param array &$rows
+   *   Empty array to populate - table rows.
+   * 
+   * @return array
+   *   Table rows.
+   */
+  public function createRows(array $nIds, array &$rows): array
+  {
     foreach ($nIds as $data) {
       $cryptoId = $data['field_crypto_target_id'];
       $node = $this->nodeStorage->load($cryptoId);
@@ -198,17 +242,41 @@ class ImportantCoinsForm extends FormBase
       }
     }
 
-
-    $form['results_table']['#rows'] = $rows;
-
-    // $form_state->setRebuild(TRUE);
-    // $form_state->set('results_table', $form['results_table']);
-
-    // $this->messenger()->addMessage($this->t('Coin Github Repos NIDS - by field: ' . $checkByField . ' - found: ' . count($nIds)));
-
-    $response->addCommand(new ReplaceCommand('#replace-form-data table', ''));
-	  $response->addCommand(new AppendCommand('#replace-form-data', $form['results_table']));
-	   
-    return $response;
+    return $rows;
   }
+
+  /**
+   * Returns pager array.
+   * 
+   * @param array $items
+   *   Array of node id - all found by query.
+   * @param int $itemsPerPage
+   *   Number of rows to render in table.
+   * @param int $currentPage
+   *   The pager element index.
+   *
+   * @return array
+   *   Array of node id - items for table rows.
+   */
+  public function pagerArray(array $items, int $itemsPerPage, int $currentPage): array
+  {
+    // Get total items count.
+    $total = count($items);
+    $pager = $this->pagerManager->createPager($total, $itemsPerPage);
+    // Get the number of the current page.
+    // $currentPage = $pager->getCurrentPage();
+
+    // Split an array into chunks.
+    $chunks = array_chunk($items, $itemsPerPage);
+
+    $countChunks = count($chunks);
+    if ($currentPage > $countChunks - 1) {
+      $currentPage = $countChunks - 1;
+    }
+
+    // Return current group item.
+    $currentPageItems = $chunks[$currentPage];
+    return $currentPageItems;
+  }
+
 }

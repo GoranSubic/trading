@@ -1,0 +1,6 @@
+important-coins-form-js:
+  version: 1.x
+  js:
+    js/important-coins-form-js.js: {}
+  dependencies:
+    - core/jquery
