@@ -3,6 +3,8 @@
 namespace Drupal\trading_crawler\Form;
 
 use Drupal;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Database\Query\PagerSelectExtender;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -11,6 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ImportantCoinsForm extends FormBase
 {
+  const PERPAGE = 10;
 
   /**
    * The node storage.
@@ -26,6 +29,8 @@ class ImportantCoinsForm extends FormBase
    */
   protected $pagerManager;
 
+  protected $database;
+
   /**
    * Constructs a new ImportantCoinsForm.
    *
@@ -33,11 +38,13 @@ class ImportantCoinsForm extends FormBase
    *   The custom block storage.
    * @param \Drupal\Core\Pager\PagerManagerInterface $pagerManager
    *   The pager manager service.
+   * @param Drupal\Core\Database\Connection
    *
    */
-  public function __construct(EntityStorageInterface $node_storage, PagerManagerInterface $pagerManager) {
+  public function __construct(EntityStorageInterface $node_storage, PagerManagerInterface $pagerManager, Connection $database) {
     $this->nodeStorage = $node_storage;
     $this->pagerManager = $pagerManager;
+    $this->database = $database;
   }
 
   /**
@@ -46,7 +53,8 @@ class ImportantCoinsForm extends FormBase
   public static function create(ContainerInterface $container) {
     $entityTypeManager = $container->get('entity_type.manager');
     $pagerManager = $container->get('pager.manager');
-    return new static($entityTypeManager->getStorage('node'), $pagerManager);
+    $database = $container->get('database');
+    return new static($entityTypeManager->getStorage('node'), $pagerManager, $database);
   }
 
   /**
@@ -70,6 +78,7 @@ class ImportantCoinsForm extends FormBase
     $checkByField = $session->get('check_by');
     $fromValue = $session->get('from_value');
     $toValue = $session->get('to_value');
+    $priority1 = $session->get('priority_1');
     
     $form['#attached']['library'][] = 'trading_crawler/important-coins-form-js';
 
@@ -104,6 +113,17 @@ class ImportantCoinsForm extends FormBase
       '#min' => 0,
     ];
 
+    $form['priority_1'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Important'),
+      '#options' => [
+        'priority_yes' => 'Yes',
+        'priority_no' => 'No',
+      ],
+      '#default_value' => $priority1 ? $priority1 : '',
+      '#empty_option' => $this->t('- Not set -'),
+    ];
+
     $form['actions']['#type'] = 'actions';
     
     $form['actions']['submit'] = [
@@ -136,11 +156,12 @@ class ImportantCoinsForm extends FormBase
 
     if (!empty($form_state->getValue('pager'))) {
       $form['pager'] = $form_state->getValue('pager');
-    } else if (empty($form_state->getValue('results_table')) && $pagerValue !== NULL && !empty($allNids)) {
+    } else 
+    if (empty($form_state->getValue('results_table')) && $pagerValue !== NULL && !empty($allNids)) {
       // Build pager after choosing pager link
-      $perPage = 10;
       $rows = [];
-      $pagerNids = $this->pagerArray($allNids, $perPage, $pagerValue);
+      $pagerNids = $this->pagerArray($allNids, self::PERPAGE, $pagerValue);
+
       $this->createRows($pagerNids, $rows);
       $form['results_table']['#rows'] = $rows;
 
@@ -180,23 +201,53 @@ class ImportantCoinsForm extends FormBase
     $checkByField = $form_state->getValue('check_by');
     $fromValue = $form_state->getValue('from_value');
     $toValue = $form_state->getValue('to_value');
+    $priority1 = $form_state->getValue('priority_1');
 
     $session->set('check_by', $checkByField);
     $session->set('from_value', $fromValue);
     $session->set('to_value', $toValue);
+    $session->set('priority_1', $priority1);
     
-    $query = $this->nodeStorage->getAggregateQuery();
-    $query->condition('type', 'coin_github_repository')
-      ->condition($checkByField, $fromValue, '>=')
-      ->condition($checkByField, $toValue, '<=')
-      ->sort('field_coin_repository_name', 'ASC')
-      ->groupBy('field_crypto');
-    
-    $allNids = $query->execute();
-    $session->set('all_nids', $allNids);
+    if (empty($priority1)) {
+      $query = $this->nodeStorage->getAggregateQuery();
+      $query->condition('type', 'coin_github_repository')
+        ->condition($checkByField, $fromValue, '>=')
+        ->condition($checkByField, $toValue, '<=')
+        ->sort('field_coin_repository_name', 'ASC')
+        ->groupBy('field_crypto');
 
-    $query->pager();
-    $nIds = $query->execute();
+      $allNids = $query->execute();
+      $session->set('all_nids', $allNids);
+
+      $query->pager();
+      $nIds = $query->execute();  
+    } else {
+      $priorityCheck = $priority1 == 'priority_yes' ? '1' : '0';
+      $query = $this->database->select('node_field_data', 'n');
+
+      $query->leftjoin('node__field_coin_repository_name', 'nfcrn', 'nfcrn.entity_id = n.nid');
+      $query->leftjoin('node__' . $checkByField, 'ncbf', 'ncbf.entity_id = n.nid');
+      $query->leftjoin('node__field_crypto', 'nfc', 'nfc.entity_id = n.nid');
+      $query->leftjoin('node__field_priority_1', 'nfp1', 'nfp1.entity_id = nfc.field_crypto_target_id');
+
+      $query->fields('n', ['nid']);
+      $query->fields('nfc', ['field_crypto_target_id']);
+
+      $query->condition('n.status', 1);
+      $query->condition('n.type', 'coin_github_repository');
+      $query->condition('ncbf.' . $checkByField . '_value', $fromValue, '>=');
+      $query->condition('ncbf.' . $checkByField . '_value', $toValue, '<=');
+      $query->condition('nfp1.field_priority_1_value', $priorityCheck, '=');
+
+      $query->orderBy('nfcrn.field_coin_repository_name_value', 'ASC');
+      $query->groupBy('nfc.field_crypto_target_id');
+
+      $allNids = $query->execute()->fetchAllAssoc('nid');
+      $session->set('all_nids', $allNids);
+
+      $query = $query->extend(PagerSelectExtender::class)->limit(self::PERPAGE);
+      $nIds = $query->execute()->fetchAllAssoc('nid');
+    }
 
     $rows = [];
     $this->createRows($nIds, $rows);
@@ -226,7 +277,11 @@ class ImportantCoinsForm extends FormBase
   public function createRows(array $nIds, array &$rows): array
   {
     foreach ($nIds as $data) {
-      $cryptoId = $data['field_crypto_target_id'];
+      if (is_array($data)) {
+        $cryptoId = $data['field_crypto_target_id'];
+      } else {
+        $cryptoId = $data->field_crypto_target_id;
+      }
       $node = $this->nodeStorage->load($cryptoId);
 
       if (!empty($node)) {
